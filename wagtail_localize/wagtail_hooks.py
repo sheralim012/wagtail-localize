@@ -469,12 +469,11 @@ def register_icons(icons):
     return icons + ["wagtail_localize/icons/wagtail-localize-convert.svg"]
 
 
-if WAGTAIL_VERSION >= (2, 17):
+if WAGTAIL_VERSION >= (3, 0):
     from .models import LocaleSynchronization
 
     @hooks.register("construct_translated_pages_to_cascade_actions")
     def construct_synced_page_tree_list(pages: List[Page], action: str):
-
         locale_sync_map = {}
         for page in pages:
             # TODO: what about locale C follows B which follows A, when we come in from A?
