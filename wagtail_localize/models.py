@@ -374,7 +374,6 @@ class TranslationSource(models.Model):
 
         source, created = cls.objects.update_or_create(
             object=object,
-            locale=instance.locale,
             # You can't update the content type of a source. So if this happens,
             # it'll try and create a new source and crash (can't have more than
             # one source per object/locale)
@@ -432,7 +431,6 @@ class TranslationSource(models.Model):
 
         source, created = cls.objects.update_or_create(
             object=object,
-            locale=instance.locale,
             # You can't update the content type of a source. So if this happens,
             # it'll try and create a new source and crash (can't have more than
             # one source per object/locale)
