@@ -130,7 +130,7 @@ class TestTranslationReport(TestCase, WagtailTestUtils):
         )
 
         self.assertNotIn(self.snippet_translation, response.context["object_list"])
-        self.assertNotIn(self.homepage_translation, response.context["object_list"])
+        self.assertIn(self.homepage_translation, response.context["object_list"])
         self.assertIn(self.de_homepage_translation, response.context["object_list"])
         self.assertNotIn(self.blog_index_translation, response.context["object_list"])
         self.assertNotIn(self.blog_post_translation, response.context["object_list"])
