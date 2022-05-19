@@ -142,6 +142,46 @@ class TestSubmitPageTranslation(TestCase, WagtailTestUtils):
         self.en_blog_post_child = make_test_page(
             self.en_blog_post, title="A deep page", slug="deep-page"
         )
+    
+    def test_post_submit_page_translation_from_translated_page(self):
+        page_01 = make_test_page(self.en_homepage, title="Page 01", slug="page01")
+        response = self.client.post(
+            reverse(
+                "wagtail_localize:submit_page_translation",
+                args=[page_01.id],
+            ),
+            {"locales": [self.fr_locale.id]},
+        )
+
+        translation = Translation.objects.get()
+        self.assertEqual(translation.source.locale, self.en_locale)
+        self.assertEqual(translation.target_locale, self.fr_locale)
+        self.assertTrue(translation.created_at)
+
+        # The translated page should've been created and published
+        fr_page_01 = page_01.get_translation(self.fr_locale)
+
+        self.assertTrue(fr_page_01.live)
+        
+        self.assertRedirects(
+            response, reverse("wagtailadmin_pages:edit", args=[fr_page_01.id])
+        )
+
+        response = self.client.post(
+            reverse(
+                "wagtail_localize:submit_page_translation",
+                args=[fr_page_01.id],
+            ),
+            {"locales": [self.de_locale.id]},
+        )
+
+        de_page_01 = fr_page_01.get_translation(self.de_locale)
+
+        self.assertTrue(de_page_01.live)
+
+        self.assertRedirects(
+            response, reverse("wagtailadmin_pages:edit", args=[de_page_01.id])
+        )
 
     def test_get_submit_page_translation(self):
         response = self.client.get(
@@ -611,7 +651,6 @@ class TestSubmitPageTranslation(TestCase, WagtailTestUtils):
             response, reverse("wagtailadmin_pages:edit", args=[translated_page.id])
         )
         self.assertFalse(translated_page.live)
-
 
 @override_settings(
     LANGUAGES=[
