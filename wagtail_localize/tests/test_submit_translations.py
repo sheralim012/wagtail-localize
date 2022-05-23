@@ -584,6 +584,43 @@ class TestSubmitPageTranslation(TestCase, WagtailTestUtils):
             translated_page.view_restrictions.first().pk, view_restriction.pk
         )
 
+    def test_post_submit_page_translation_from_translated_page(self):
+        page_01 = make_test_page(self.en_homepage, title="Page 01", slug="page01")
+
+        response = self.client.post(
+            reverse(
+                "wagtail_localize:submit_page_translation",
+                args=[page_01.id],
+            ),
+            {"locales": [self.fr_locale.id]},
+        )
+
+        translation = Translation.objects.get()
+        self.assertEqual(translation.source.locale, self.en_locale)
+        self.assertEqual(translation.target_locale, self.fr_locale)
+        self.assertTrue(translation.created_at)
+
+        # The translated page should've been created and published
+        fr_page_01 = page_01.get_translation(self.fr_locale)
+        self.assertTrue(fr_page_01.live)
+        self.assertRedirects(
+            response, reverse("wagtailadmin_pages:edit", args=[fr_page_01.id])
+        )
+
+        response = self.client.post(
+            reverse(
+                "wagtail_localize:submit_page_translation",
+                args=[fr_page_01.id],
+            ),
+            {"locales": [self.de_locale.id]},
+        )
+
+        de_page_01 = fr_page_01.get_translation(self.de_locale)
+        self.assertTrue(de_page_01.live)
+        self.assertRedirects(
+            response, reverse("wagtailadmin_pages:edit", args=[de_page_01.id])
+        )
+
 
 @override_settings(
     LANGUAGES=[
